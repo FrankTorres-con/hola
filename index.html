@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Aurora ❤️</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<canvas id="fireworks"></canvas>
+<canvas id="hearts"></canvas>
+
+<!-- ================= PANTALLA INICIAL ================= -->
+<div class="content" id="pantallaInicial">
+    <h1 class="titulo">Feliz Año Nuevo</h1>
+    <div class="amor">Amor✨</div>
+    <div class="fecha-box">Mi: <strong>24</strong></div>
+    <div id="mensaje" class="mensaje oculto">
+        Gracias por existir 💖<br>
+        Este año también es contigo ✨
+    </div>
+    <button onclick="activarAmor()">Presiona aquí 💕</button>
+    <br><br>
+    <button id="btnSorpresa">Abrir sorpresa 💌</button>
+</div>
+
+<!-- ================= MODAL CONTRASEÑA ================= -->
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <h2>Escribe la contraseña 💖</h2>
+        <input type="password" id="clave" placeholder="Tu fecha especial">
+        <button onclick="validarClave()">Entrar</button>
+        <p id="error" style="color:red; display:none;">Contraseña incorrecta 😘</p>
+        <p class="pista">Pista: Nuestro gatito + nuestra fecha</p>
+    </div>
+</div>
+
+<!-- ================= GALERÍA ================= -->
+<div id="sorpresaScreen" class="oculto">
+    <h1 class="titulo" style="margin-top: 20px;">🎉 Nuestra Galería 🎉</h1>
+    <div id="galeriaContainer">
+        <div id="galeria"></div>
+    </div>
+</div>
+
+<!-- ================= MODAL IMAGEN ================= -->
+<div id="imagenModal" class="modal">
+    <div class="modal-content">
+        <img id="imagenGrande" src="" alt="">
+        <p id="fraseGrande"></p>
+        <button id="btnSiguiente">Siguiente</button>
+        <button onclick="cerrarImagenModal()">Cerrar</button>
+    </div>
+</div>
+
+<script>
+// ================= FUEGOS ARTIFICIALES =================
+const canvas = document.getElementById("fireworks");
+const ctx = canvas.getContext("2d");
+canvas.width = innerWidth; 
+canvas.height = innerHeight;
+let fireworks = [];
+
+function crearFuego(){
+    const x = Math.random() * canvas.width;
+    const y = Math.random() * canvas.height / 2;
+    const color = `hsl(${Math.random()*360},100%,60%)`;
+    for(let i=0;i<120;i++){
+        fireworks.push({
+            x, y,
+            vx: Math.cos(i) * Math.random() * 6,
+            vy: Math.sin(i) * Math.random() * 6,
+            alpha: 1,
+            color
+        });
+    }
+}
+
+function animarFuegos(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    fireworks.forEach((p,i)=>{
+        p.x += p.vx;
+        p.y += p.vy;
+        p.alpha -= 0.02;
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,2,0,Math.PI*2);
+        ctx.fillStyle = p.color;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = p.color;
+        ctx.fill();
+        if(p.alpha <= 0) fireworks.splice(i,1);
+    });
+    requestAnimationFrame(animarFuegos);
+}
+
+for(let i=0;i<8;i++){ setTimeout(crearFuego, i*400); }
+animarFuegos();
+
+// ================= CORAZONES =================
+const canvasH = document.getElementById("hearts");
+const ctxH = canvasH.getContext("2d");
+canvasH.width = innerWidth; 
+canvasH.height = innerHeight;
+let corazones = [];
+
+function lanzarCorazones(){
+    for(let i=0;i<60;i++){
+        corazones.push({
+            x: Math.random()*canvasH.width,
+            y: canvasH.height + Math.random()*100,
+            size: Math.random()*20 + 15,
+            speed: Math.random()*1.5 + 0.5,
+            drift: Math.random()*2 - 1
+        });
+    }
+}
+
+function dibujarCorazon(x,y,size){
+    ctxH.fillStyle="rgba(255,80,120,0.9)";
+    ctxH.beginPath();
+    ctxH.moveTo(x,y);
+    ctxH.bezierCurveTo(x-size,y-size,x-size*2,y+size/2,x,y+size*2);
+    ctxH.bezierCurveTo(x+size*2,y+size/2,x+size,y-size,x,y);
+    ctxH.fill();
+}
+
+function animarCorazones(){
+    ctxH.clearRect(0,0,canvasH.width,canvasH.height);
+    corazones.forEach((c,i)=>{
+        c.y -= c.speed;
+        c.x += c.drift;
+        if(c.y < -50) corazones.splice(i,1);
+        dibujarCorazon(c.x,c.y,c.size);
+    });
+    requestAnimationFrame(animarCorazones);
+}
+
+animarCorazones();
+
+function activarAmor(){
+    document.getElementById("mensaje").classList.remove("oculto");
+    lanzarCorazones();
+}
+
+// ================= MODAL Y GALERÍA =================
+const btnSorpresa = document.getElementById('btnSorpresa');
+const modal = document.getElementById('modal');
+const pantallaInicial = document.getElementById('pantallaInicial');
+const sorpresaScreen = document.getElementById('sorpresaScreen');
+
+btnSorpresa.addEventListener('click',()=>{
+    modal.style.display='flex';
+});
+
+function validarClave(){
+    const clave = document.getElementById('clave').value;
+    const error = document.getElementById('error');
+    if(clave === 'leo24'){
+        modal.style.display='none';
+        pantallaInicial.style.display='none';
+        sorpresaScreen.classList.remove('oculto');
+        cargarImagenes();
+    } else {
+        error.style.display='block';
+    }
+}
+
+// ================= FRASES =================
+const frases = [
+    "Eres mi alegría diaria.",
+    "Contigo todo es mejor.",
+    "Gracias por existir.",
+    "Tu sonrisa ilumina mi día.",
+    "Eres un sueño hecho realidad.",
+    "Cada momento contigo es especial.",
+    "Siempre a tu lado, siempre juntos.",
+    "Eres mi inspiración constante.",
+    "No hay nadie como tú.",
+    "Nuestro amor es infinito."
+];
+
+// ================= CARGAR IMÁGENES =================
+let imagenesArray = [];
+let indiceActual = 0;
+
+function cargarImagenes(){
+    const galeria = document.getElementById('galeria');
+    galeria.innerHTML = "";
+    for(let i=1;i<=33;i++){
+        const img = document.createElement('img');
+        img.src = `${i}.jpeg`;
+        img.alt = `Recuerdo ${i}`;
+        img.addEventListener('click',()=>abrirImagenModal(i-1));
+        galeria.appendChild(img);
+        imagenesArray.push(`${i}.jpeg`);
+    }
+}
+
+// ================= MODAL IMAGEN GRANDE =================
+const imagenModal = document.getElementById('imagenModal');
+const imagenGrande = document.getElementById('imagenGrande');
+const fraseGrande = document.getElementById('fraseGrande');
+const btnSiguiente = document.getElementById('btnSiguiente');
+
+function abrirImagenModal(indice){
+    indiceActual = indice;
+    imagenGrande.src = imagenesArray[indiceActual];
+    fraseGrande.textContent = frases[Math.floor(Math.random()*frases.length)];
+    imagenModal.style.display='flex';
+}
+
+btnSiguiente.addEventListener('click',()=>{
+    indiceActual = (indiceActual + 1) % imagenesArray.length;
+    imagenGrande.src = imagenesArray[indiceActual];
+    fraseGrande.textContent = frases[Math.floor(Math.random()*frases.length)];
+});
+
+function cerrarImagenModal(){
+    imagenModal.style.display='none';
+}
+
+// ================= AJUSTE DE CANVAS =================
+window.onresize = ()=>{
+    canvas.width = innerWidth; 
+    canvas.height = innerHeight;
+    canvasH.width = innerWidth; 
+    canvasH.height = innerHeight;
+};
+</script>
+
+</body>
+</html>
